@@ -30,7 +30,7 @@ fi
 exec odoo \
   --http-interface=0.0.0.0 \
   --http-port="${PORT}" \
-  --proxy-mode=1 \
+  --proxy-mode \
   --db_host="${DB_HOST}" \
   --db_port="${DB_PORT}" \
   --db_user="${DB_USER}" \
@@ -40,4 +40,4 @@ exec odoo \
   --limit-time-real=1200 \
   --limit-memory-soft=134217728 \
   --limit-memory-hard=201326592 \
-  --workers="${WORKERS}"
+  --workers="${WORKERS}".
