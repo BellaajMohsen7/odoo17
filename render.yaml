@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: odoo17
+    env: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /web/login
+    envVars:
+      # Database connection (set values in Render dashboard)
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Leave DB_NAME empty on first deploy to use Odoo's DB Manager UI
+      - key: DB_NAME
+        sync: false
+      # Optional: limit visible DBs (regex), e.g. ^odoo17_db$
+      - key: DB_FILTER
+        sync: false
+      # Odoo server-wide admin password (used by DB Manager)
+      - key: ODOO_MASTER_PASSWORD
+        sync: false
+      # SSL for Postgres
+      - key: PGSSLMODE
+        value: require
+      # Free plan: single worker
+      - key: WORKERS
+        value: "0"
