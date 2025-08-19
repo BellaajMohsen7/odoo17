@@ -18,26 +18,34 @@ set -euo pipefail
 : "${PGSSLMODE:=require}"
 export PGSSLMODE
 
-# Optional database name and filter
-EXTRA_DB_ARGS=()
+# Build a minimal Odoo config file to set admin_passwd (not available as a CLI flag in Odoo 17)
+CONFIG_FILE="/tmp/odoo.conf"
+{
+  echo "[options]"
+  echo "admin_passwd = ${ODOO_MASTER_PASSWORD}"
+  echo "db_host = ${DB_HOST}"
+  echo "db_port = ${DB_PORT}"
+  echo "db_user = ${DB_USER}"
+  echo "db_password = ${DB_PASSWORD}"
+} > "${CONFIG_FILE}"
+
+# Optional database name and filter (written to config for consistency)
 if [[ -n "${DB_NAME:-}" ]]; then
-  EXTRA_DB_ARGS+=(--database="${DB_NAME}")
+  echo "db_name = ${DB_NAME}" >> "${CONFIG_FILE}"
 fi
 if [[ -n "${DB_FILTER:-}" ]]; then
-  EXTRA_DB_ARGS+=(--db-filter="${DB_FILTER}")
+  echo "dbfilter = ${DB_FILTER}" >> "${CONFIG_FILE}"
 fi
 
+# For visibility in logs (without secrets)
+echo "Using Odoo config at ${CONFIG_FILE}"
+
 exec odoo \
+  -c "${CONFIG_FILE}" \
   --http-interface=0.0.0.0 \
   --http-port="${PORT}" \
   --proxy-mode \
-  --db_host="${DB_HOST}" \
-  --db_port="${DB_PORT}" \
-  --db_user="${DB_USER}" \
-  --db_password="${DB_PASSWORD}" \
-  "${EXTRA_DB_ARGS[@]}" \
-  --admin-passwd="${ODOO_MASTER_PASSWORD}" \
   --limit-time-real=1200 \
   --limit-memory-soft=134217728 \
   --limit-memory-hard=201326592 \
-  --workers="${WORKERS}".
+  --workers="${WORKERS}"
